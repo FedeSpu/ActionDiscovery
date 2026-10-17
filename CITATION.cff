@@ -1,0 +1,29 @@
+cff-version: 1.2.0
+message: "If you use this implementation, please cite the Action Discovery paper."
+title: ActionDiscovery
+type: software
+version: 0.1.0
+license: CC-BY-NC-4.0
+authors: &authors
+  - family-names: Spurio
+    given-names: Federico
+  - family-names: Bahrami
+    given-names: Emad
+  - family-names: Zatsarynna
+    given-names: Olga
+  - family-names: Abu Farha
+    given-names: Yazan
+  - family-names: Francesca
+    given-names: Gianpiero
+  - family-names: Gall
+    given-names: Juergen
+repository-code: https://github.com/FedeSpu/ActionDiscovery
+preferred-citation:
+  type: article
+  title: "Looking into the unknown: Exploring Action Discovery for segmentation of known and unknown actions"
+  authors: *authors
+  doi: 10.1016/j.cviu.2026.104849
+  year: 2026
+  journal: Computer Vision and Image Understanding
+  volume: 270
+  start: '104849'
