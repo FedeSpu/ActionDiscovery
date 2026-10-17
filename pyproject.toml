@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "actiondiscovery"
+version = "0.1.0"
+description = "Granularity-guided discovery of unknown actions in partially annotated videos"
+license = {file = "LICENSE"}
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "numpy==1.26.4", "scipy==1.13.1", "scikit-learn==1.5.0",
+  "torch==2.6.0", "PyYAML>=6.0,<7", "tqdm>=4.66,<5",
+]
+
+[project.optional-dependencies]
+tracking = ["wandb>=0.17,<1"]
+test = ["pytest>=8,<9"]
+
+[project.scripts]
+actiondiscovery = "actiondiscovery.cli:main"
+
+[tool.setuptools]
+license-files = ["LICENSE", "THIRD_PARTY.md"]
+
+[tool.setuptools.packages.find]
+include = ["actiondiscovery*"]
+
+[tool.setuptools.data-files]
+"share/actiondiscovery/protocols/breakfast" = ["protocols/breakfast/*"]
+"share/actiondiscovery/protocols/fs_fine" = ["protocols/fs_fine/*"]
+"share/actiondiscovery/protocols/fs_coarse" = ["protocols/fs_coarse/*"]
+"share/actiondiscovery/protocols/desktop_assembly" = ["protocols/desktop_assembly/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
