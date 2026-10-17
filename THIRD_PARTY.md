@@ -1,13 +1,11 @@
 # Attribution and release licensing
 
-This release adapts the author's OpenTAS implementation recorded in
+This release adapts the author's ActionDiscovery implementation recorded in
 `docs/provenance.json`. The MS-TCN backbone and segmentation metric definitions
 derive from [MS-TCN](https://github.com/yabufarha/ms-tcn), in particular the
-[reference evaluation code](https://github.com/yabufarha/ms-tcn/blob/c1f537b18772564433445d63948b80a096a3529f/eval.py).
-OpenTAS also attributes its metric wrapper to
-[MuCon](https://github.com/yassersouri/MuCon/tree/main/src/core/metrics).
-The release implements the corresponding metrics directly and does not bundle
-the MuCon wrapper, TW-FINCH, ASOT, or other baseline implementations.
+[reference evaluation
+code](https://github.com/yabufarha/ms-tcn/blob/c1f537b18772564433445d63948b80a096a3529f/eval.py),
+and from [LTContext](https://github.com/ltcontext/ltcontext).
 
 The project's original contributions are licensed under the Creative Commons
 Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0); see `LICENSE`.
