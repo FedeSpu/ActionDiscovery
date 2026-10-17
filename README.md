@@ -9,6 +9,25 @@ class, segments videos with the Granularity-Guided Segmentation Module (GGSM),
 and discovers unknown classes with Unknown Action Segment Assignment (UASA).
 Discovery is fitted on training videos. Test labels are used exclusively during evaluation.
 
+## Installation
+
+The paper results where produced with Python 3.12.3, PyTorch 2.6.0 with CUDA 12.4,
+NumPy 1.26.4, and scikit-learn 1.5.0. To install it, run from this repository:
+
+```bash
+conda env create -f environment.yml
+conda activate actiondiscovery
+```
+
+For an existing Python 3.12 environment:
+
+```bash
+python -m pip install torch==2.6.0 --index-url https://download.pytorch.org/whl/cu124
+python -m pip install -e '.[test]'
+```
+
+For tracking the experiments with Weight and Biases (wandb) (optional), install `.[tracking]` and pass `--wandb-project NAME`. Default runs require no tracking account and write logs locally.
+
 ## Data preparation
 
 This implementation starts from precomputed features; it does not extract features
@@ -65,14 +84,105 @@ and train/test manifests introduced by this work. It defines the experiment part
 any split files in your data directory. Fine and Coarse FS require different
 ground-truth labels, although they can reuse the same feature arrays.
 
+### Check data validity
+
+To check if the data follows the expected format, run:
+
+```bash
+python scripts/validate_data.py --config configs/fs_fine.yaml --data-root </path/to/data>
+```
+
+Add `--all-features` to validate feature dimensions, finite values, and annotation
+contents rather than checking paths only.
+
+## Training and evaluation
+
+Train one fold:
+
+```bash
+python run_net.py --mode train --config configs/fs_fine.yaml \
+  --data-root </path/to/data> --split 1 --output-dir runs/fs_fine/split1/train
+```
+
+then evaluate the checkpoint:
+
+```bash
+python run_net.py --mode evaluate --config configs/fs_fine.yaml \
+  --data-root </path/to/data> --split 1 \
+  --checkpoint runs/fs_fine/split1/train/checkpoint.pt \
+  --output-dir runs/fs_fine/split1/evaluate
+```
+
+Evaluation first fits UASA using only the training split and partial training
+labels, then freezes that state and predicts test videos. It saves `discovery.pt`,
+per-video predictions, and `metrics.json` with known/unknown MoF, Edit, F1@10,
+F1@25, and F1@50, the estimated unknown-class count, and BIC scores. To reuse the
+fitted state, pass `--discovery </path/to/discovery.pt>`; it must match the checkpoint,
+resolved configuration, and training manifest. Output directories must be fresh.
+
+| Configuration | Folds | Known actions | Unknown actions |
+| --- | ---: | ---: | ---: |
+| `breakfast.yaml` | 1–4 | 33 | 15 |
+| `fs_fine.yaml` | 1–5 | 13 | 6 |
+| `fs_coarse.yaml` | 1–5 | 7 | 4 |
+| `desktop_assembly.yaml` | 1 | 16 plus Background | 6 |
+
+Edit/F1 retain the full timeline and ignore excluded labels independently in
+predictions and ground truth, while MoF uses valid ground-truth frames. Breakfast
+skips partition-empty target videos; FS retains them.
+
+Run every fold separately, then average the per-fold percentages equally:
+
+```bash
+python scripts/summarize_folds.py runs/fs_fine/split*/evaluate/metrics.json
+```
+
+Each run stores its configuration and checkpoint;
+report cross-fold results separately from a single-fold smoke test. The reference
+backbone is MS-TCN with GGSM and UASA enabled for all main recipes. Checkpoints
+are tied to the model configuration and action mapping used to train them.
+
+Use `--device cpu` or `--device cuda:0` to choose execution explicitly. The default
+selects CUDA when available. `--threads` controls CPU PyTorch threads. A quick
+pipeline check keeps the paper architecture but limits work:
+
+```bash
+python run_net.py --mode train --config configs/fs_fine.yaml \
+  --data-root </path/to/data> --epochs 1 --max-videos 2 --max-frames 512 \
+  --device cpu --output-dir runs/smoke/fs_fine/train
+```
+
+Use the same `--max-videos` and `--max-frames` limits during its evaluation. These
+options produce truncated smoke runs, not paper results. Complete-linkage GGSM
+requires quadratic memory in sequence length; full-length runs need substantial
+RAM, as in the paper's reported server environment.
+
+## Code and verification
+
+`actiondiscovery/model.py` contains MS-TCN [[1]](#ref-mstcn); `loss.py` handles training objectives;
+`discovery.py` implements GGSM and UASA; `data.py` defines the dataloader;
+`metrics.py` performs dataset-level matching and scoring. `engine.py` coordinates
+the pipeline, and `cli.py` handles configuration and run output.
+
+In order to check data loader, model, discovery, evaluation, and saved checkpoint, run:
+
+```bash
+python -m unittest discover -s tests -v
+```
+
 ## Acknowledgements
 
 The backbone, temporal smoothing objective, and segmentation metric definitions
 are adapted from [MS-TCN](https://github.com/yabufarha/ms-tcn) [[1]](#ref-mstcn)
-and [LTContext](https://github.com/ltcontext/ltcontext). We thank these authors for their code, and the dataset and feature
+and [LTContext](https://github.com/ltcontext/ltcontext). The research implementation
+also drew on the [MuCon](https://github.com/yassersouri/MuCon/tree/main/src/core/metrics)
+metric wrapper; this repository implements the metrics directly. We thank these
+authors for their code, and the dataset and feature
 providers for their resources. TOT [[4]](#ref-tot) is a data/feature source here,
 not a bundled training baseline. See [THIRD_PARTY.md](THIRD_PARTY.md) for attribution
 and licensing details.
+
+The original code is written by the authors, while the clean released code, along with `README.md`, is co-written with Codex.
 
 ## Citation
 
