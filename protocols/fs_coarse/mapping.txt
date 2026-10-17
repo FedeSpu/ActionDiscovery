@@ -1,0 +1,11 @@
+1 action_start
+2 cucumber
+3 tomato
+4 lettuce
+5 add_dressing
+6 serve_salad_onto_plate
+7 action_end
+8 add_spice
+9 cheese
+10 mix_dressing
+11 mix_ingredients
