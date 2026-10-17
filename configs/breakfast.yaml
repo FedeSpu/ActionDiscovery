@@ -1,0 +1,22 @@
+protocol: breakfast
+dataset_folder: breakfast
+splits: 4
+sampling_rate: 1
+feature_layout: DT
+normalize_features: false
+seed: 0
+model:
+  input_dim: 2048
+  hidden_dim: 64
+  stages: 4
+  layers: 10
+  dropout: 0.5
+training:
+  epochs: 160
+  smoothing_weight: 0.15
+  contrastive_weight: 0.1
+  temperature: 0.4
+discovery:
+  alpha: 0.001
+  hierarchy_levels: 14
+  max_components: 20

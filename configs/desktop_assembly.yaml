@@ -1,0 +1,23 @@
+protocol: desktop_assembly
+dataset_folder: DesktopAssembly
+splits: 1
+sampling_rate: 1
+feature_layout: TD
+normalize_features: false
+seed: 0
+ignore_labels: [Background]
+model:
+  input_dim: 512
+  hidden_dim: 64
+  stages: 4
+  layers: 10
+  dropout: 0.5
+training:
+  epochs: 160
+  smoothing_weight: 0.15
+  contrastive_weight: 0.1
+  temperature: 0.4
+discovery:
+  alpha: 0.001
+  hierarchy_levels: 30
+  max_components: 20
